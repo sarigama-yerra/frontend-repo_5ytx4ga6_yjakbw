@@ -1,6 +1,6 @@
 import React, { useState } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
-import { Home, Trophy, Bookmark, GraduationCap, ChevronRight, ChevronLeft, ChevronDown, Grid3X3, Menu, X } from 'lucide-react'
+import { Home, Trophy, Bookmark, GraduationCap, ChevronRight, ChevronLeft, ChevronDown, Grid3X3, Menu, X, Check } from 'lucide-react'
 
 function Sidebar() {
   const menu = [
@@ -100,7 +100,7 @@ function MobileSidebar({ open, onClose }) {
   )
 }
 
-function ExamSelector() {
+function ExamSelector({ selectedExam, onChange }) {
   return (
     <div className="rounded-2xl bg-white p-4 sm:p-5 ring-1 ring-slate-200 shadow-[16px_16px_48px_rgba(0,0,0,0.06),-12px_-12px_44px_rgba(255,255,255,0.9)]">
       <div className="flex items-center justify-between flex-wrap gap-3">
@@ -108,10 +108,10 @@ function ExamSelector() {
           <div className="text-sm text-slate-500">Exam</div>
           <div className="mt-1 inline-flex items-center gap-2 rounded-full bg-[#1A73E8]/10 text-[#1A73E8] px-3 py-1.5 font-semibold">
             <Grid3X3 className="h-4 w-4" />
-            <span>JEE Main</span>
+            <span>{selectedExam || 'JEE Main'}</span>
           </div>
         </div>
-        <button className="inline-flex items-center gap-2 rounded-full bg-slate-50 px-3 py-2 text-sm text-slate-700 ring-1 ring-slate-200 hover:bg-slate-100 transition">
+        <button onClick={onChange} className="inline-flex items-center gap-2 rounded-full bg-slate-50 px-3 py-2 text-sm text-slate-700 ring-1 ring-slate-200 hover:bg-slate-100 transition">
           Change <ChevronDown className="h-4 w-4 text-slate-500" />
         </button>
       </div>
@@ -143,13 +143,13 @@ function SubjectCards() {
   )
 }
 
-function ExamsGrid() {
+function ExamsGrid({ onSelectExam }) {
   const exams = ['JEE Main', 'JEE Advanced', 'BITSAT', 'KCET']
   return (
     <div className="relative">
       <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
         {exams.map((e, i) => (
-          <a key={i} href="#" className="group rounded-2xl bg-white p-5 ring-1 ring-slate-200 shadow-[12px_12px_36px_rgba(0,0,0,0.06),-10px_-10px_36px_rgba(255,255,255,0.9)] hover:shadow-[16px_16px_48px_rgba(0,0,0,0.08),-12px_-12px_44px_rgba(255,255,255,1)] transition">
+          <button key={i} onClick={() => onSelectExam(e)} className="text-left group rounded-2xl bg-white p-5 ring-1 ring-slate-200 shadow-[12px_12px_36px_rgba(0,0,0,0.06),-10px_-10px_36px_rgba(255,255,255,0.9)] hover:shadow-[16px_16px_48px_rgba(0,0,0,0.08),-12px_-12px_44px_rgba(255,255,255,1)] transition">
             <div className="flex items-center justify-between">
               <div>
                 <div className="font-semibold text-slate-900">{e}</div>
@@ -157,7 +157,7 @@ function ExamsGrid() {
               </div>
               <div className="h-10 w-10 rounded-xl bg-slate-50 grid place-items-center ring-1 ring-slate-200"> <ChevronRight className="h-5 w-5 text-slate-500"/> </div>
             </div>
-          </a>
+          </button>
         ))}
       </div>
 
@@ -170,8 +170,171 @@ function ExamsGrid() {
   )
 }
 
+function FlowModal({ open, onClose, step, onBack, onNext, onSelectSubject, onSelectYear, selectedExam, selectedSubject, selectedYearRange, chapters, selectedChapters, onToggleChapter, onBegin }) {
+  const subjectOptions = ['All Subjects (PCM)', 'Maths PYQs', 'Chemistry PYQs', 'Physics PYQs']
+  const yearOptions = ['Last year', 'Last 3 years', 'Last 5 years', 'Last 10 years', 'Last 15 years']
+
+  return (
+    <AnimatePresence>
+      {open && (
+        <>
+          <motion.div className="fixed inset-0 z-[90] bg-black/40" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} onClick={onClose} />
+          <motion.div
+            className="fixed inset-0 z-[95] grid place-items-center px-4"
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+          >
+            <motion.div
+              className="w-full max-w-lg rounded-2xl bg-white ring-1 ring-slate-200 shadow-[24px_24px_64px_rgba(0,0,0,0.12),-16px_-16px_48px_rgba(255,255,255,0.9)] overflow-hidden"
+              initial={{ y: 20, scale: 0.98 }}
+              animate={{ y: 0, scale: 1 }}
+              exit={{ y: 20, opacity: 0 }}
+              transition={{ type: 'spring', stiffness: 260, damping: 24 }}
+            >
+              <div className="flex items-center justify-between px-5 py-4 border-b border-slate-200/80 bg-gradient-to-b from-white to-slate-50/60">
+                <div className="min-w-0">
+                  <div className="text-xs uppercase tracking-wide text-slate-500">{selectedExam || 'Exam'}</div>
+                  <div className="font-semibold text-slate-900 truncate">{step === 'subject' ? 'Select Subject' : step === 'year' ? 'Select Year Range' : 'Select Chapters'}</div>
+                </div>
+                <div className="flex items-center gap-2">
+                  {step !== 'subject' && (
+                    <button onClick={onBack} className="h-9 px-3 rounded-lg bg-white ring-1 ring-slate-200 hover:bg-slate-50 flex items-center gap-1 text-sm"><ChevronLeft className="h-4 w-4"/>Back</button>
+                  )}
+                  <button onClick={onClose} className="h-9 w-9 grid place-items-center rounded-lg bg-white ring-1 ring-slate-200 hover:bg-slate-50"><X className="h-5 w-5"/></button>
+                </div>
+              </div>
+
+              {/* Body */}
+              <div className="px-5 py-4">
+                {step === 'subject' && (
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                    {subjectOptions.map((s) => (
+                      <button key={s} onClick={() => onSelectSubject(s)} className={`text-left rounded-xl p-4 ring-1 transition shadow-sm hover:shadow-md ${selectedSubject === s ? 'ring-[#1A73E8] bg-[#1A73E8]/5' : 'ring-slate-200 bg-white'}`}>
+                        <div className="font-medium text-slate-900">{s}</div>
+                        <div className="text-xs text-slate-500 mt-0.5">Practice previous year questions</div>
+                      </button>
+                    ))}
+                  </div>
+                )}
+
+                {step === 'year' && (
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                    {yearOptions.map((y) => (
+                      <button key={y} onClick={() => onSelectYear(y)} className={`text-left rounded-xl p-4 ring-1 transition shadow-sm hover:shadow-md ${selectedYearRange === y ? 'ring-[#1A73E8] bg-[#1A73E8]/5' : 'ring-slate-200 bg-white'}`}>
+                        <div className="font-medium text-slate-900">{y}</div>
+                        <div className="text-xs text-slate-500 mt-0.5">Filter by exam years</div>
+                      </button>
+                    ))}
+                  </div>
+                )}
+
+                {step === 'chapters' && (
+                  <div className="space-y-4">
+                    <div className="text-sm text-slate-600">Choose chapters to include in your practice set.</div>
+                    <div className="max-h-72 overflow-y-auto rounded-xl ring-1 ring-slate-200 divide-y divide-slate-100">
+                      {chapters.map((c) => {
+                        const checked = selectedChapters.includes(c)
+                        return (
+                          <label key={c} className="flex items-center gap-3 px-4 py-3 cursor-pointer hover:bg-slate-50">
+                            <input
+                              type="checkbox"
+                              className="h-4 w-4 rounded border-slate-300 text-[#1A73E8] focus:ring-[#1A73E8]"
+                              checked={checked}
+                              onChange={() => onToggleChapter(c)}
+                            />
+                            <span className="flex-1 text-sm text-slate-800">{c}</span>
+                            {checked && <Check className="h-4 w-4 text-[#1A73E8]"/>}
+                          </label>
+                        )
+                      })}
+                    </div>
+                  </div>
+                )}
+              </div>
+
+              {/* Footer */}
+              <div className="px-5 py-4 bg-slate-50/60 border-t border-slate-200/80 flex items-center justify-between">
+                <div className="text-xs text-slate-500">
+                  {step === 'subject' && 'Step 2 of 4'}
+                  {step === 'year' && 'Step 3 of 4'}
+                  {step === 'chapters' && 'Step 4 of 4'}
+                </div>
+                <div className="flex items-center gap-2">
+                  {step === 'subject' && (
+                    <button disabled={!selectedSubject} onClick={onNext} className={`h-9 px-4 rounded-lg text-sm font-medium transition ${selectedSubject ? 'bg-[#1A73E8] text-white hover:bg-[#1667d3]' : 'bg-slate-200 text-slate-500 cursor-not-allowed'}`}>Continue</button>
+                  )}
+                  {step === 'year' && (
+                    <button disabled={!selectedYearRange} onClick={onNext} className={`h-9 px-4 rounded-lg text-sm font-medium transition ${selectedYearRange ? 'bg-[#1A73E8] text-white hover:bg-[#1667d3]' : 'bg-slate-200 text-slate-500 cursor-not-allowed'}`}>Continue</button>
+                  )}
+                  {step === 'chapters' && (
+                    <button disabled={selectedChapters.length === 0} onClick={onBegin} className={`h-9 px-4 rounded-lg text-sm font-semibold transition ${selectedChapters.length > 0 ? 'bg-[#1A73E8] text-white hover:bg-[#1667d3]' : 'bg-slate-200 text-slate-500 cursor-not-allowed'}`}>Begin Practice</button>
+                  )}
+                </div>
+              </div>
+            </motion.div>
+          </motion.div>
+        </>
+      )}
+    </AnimatePresence>
+  )
+}
+
 export default function SolvePage() {
   const [sidebarOpen, setSidebarOpen] = useState(false)
+
+  // Flow state
+  const [flowOpen, setFlowOpen] = useState(false)
+  const [step, setStep] = useState('subject') // 'subject' | 'year' | 'chapters'
+  const [selectedExam, setSelectedExam] = useState('')
+  const [selectedSubject, setSelectedSubject] = useState('')
+  const [selectedYearRange, setSelectedYearRange] = useState('')
+  const [selectedChapters, setSelectedChapters] = useState([])
+
+  const subjectChapters = {
+    'All Subjects (PCM)': ['Kinematics', 'Laws of Motion', 'Work, Power & Energy', 'Limits & Continuity', 'Differentiation', 'Integration', 'Atomic Structure', 'Chemical Bonding', 'Equilibrium'],
+    'Maths PYQs': ['Sets & Relations', 'Functions', 'Limits & Continuity', 'Differentiation', 'Integration', 'Vector Algebra', '3D Geometry', 'Probability'],
+    'Physics PYQs': ['Kinematics', 'Laws of Motion', 'Work, Power & Energy', 'Thermodynamics', 'Electrostatics', 'Current Electricity', 'Magnetism', 'Optics'],
+    'Chemistry PYQs': ['Atomic Structure', 'Periodic Table', 'Chemical Bonding', 'Thermodynamics', 'Equilibrium', 'Organic Reactions', 'Coordination Compounds']
+  }
+
+  const chapters = subjectChapters[selectedSubject] || []
+
+  const openFlow = (exam) => {
+    setSelectedExam(exam)
+    setFlowOpen(true)
+    setStep('subject')
+    setSelectedSubject('')
+    setSelectedYearRange('')
+    setSelectedChapters([])
+  }
+
+  const onBack = () => {
+    if (step === 'year') setStep('subject')
+    else if (step === 'chapters') setStep('year')
+  }
+
+  const onNext = () => {
+    if (step === 'subject') setStep('year')
+    else if (step === 'year') setStep('chapters')
+  }
+
+  const onSelectSubject = (s) => {
+    setSelectedSubject(s)
+  }
+
+  const onSelectYear = (y) => {
+    setSelectedYearRange(y)
+  }
+
+  const onToggleChapter = (c) => {
+    setSelectedChapters((prev) => prev.includes(c) ? prev.filter((x) => x !== c) : [...prev, c])
+  }
+
+  const onBegin = () => {
+    // For now, just close the modal. Later we can route to practice with these filters.
+    setFlowOpen(false)
+  }
 
   return (
     <div className="min-h-screen bg-[#F5F8FF] text-slate-900">
@@ -218,7 +381,7 @@ export default function SolvePage() {
               </div>
 
               {/* Exam Selector */}
-              <ExamSelector />
+              <ExamSelector selectedExam={selectedExam || 'JEE Main'} onChange={() => openFlow(selectedExam || 'JEE Main')} />
 
               {/* Select Subject */}
               <section className="mt-6 sm:mt-8">
@@ -233,12 +396,30 @@ export default function SolvePage() {
                 <div className="mb-3 flex items-center justify-between">
                   <h2 className="text-lg font-semibold text-slate-900">Top Engineering Exams PYQs</h2>
                 </div>
-                <ExamsGrid />
+                <ExamsGrid onSelectExam={(e) => openFlow(e)} />
               </section>
             </div>
           </div>
         </main>
       </div>
+
+      {/* Flow Modal */}
+      <FlowModal
+        open={flowOpen}
+        onClose={() => setFlowOpen(false)}
+        step={step}
+        onBack={onBack}
+        onNext={onNext}
+        onSelectSubject={(s) => { setSelectedSubject(s); setStep('year') }}
+        onSelectYear={(y) => { setSelectedYearRange(y); setStep('chapters') }}
+        selectedExam={selectedExam}
+        selectedSubject={selectedSubject}
+        selectedYearRange={selectedYearRange}
+        chapters={chapters}
+        selectedChapters={selectedChapters}
+        onToggleChapter={onToggleChapter}
+        onBegin={onBegin}
+      />
     </div>
   )
 }
