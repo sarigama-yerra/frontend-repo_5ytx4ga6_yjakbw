@@ -1,6 +1,7 @@
 import React, { useState } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 import { Home, Trophy, Bookmark, GraduationCap, ChevronRight, ChevronLeft, ChevronDown, Grid3X3, Menu, X, Check } from 'lucide-react'
+import { useNavigate } from 'react-router-dom'
 
 function Sidebar() {
   const menu = [
@@ -299,6 +300,7 @@ function FlowModal({ open, onClose, step, onBack, onNext, onSelectSubject, onSel
 
 export default function SolvePage() {
   const [sidebarOpen, setSidebarOpen] = useState(false)
+  const navigate = useNavigate()
 
   // Flow state
   const [flowOpen, setFlowOpen] = useState(false)
@@ -348,9 +350,25 @@ export default function SolvePage() {
     setSelectedChapters((prev) => prev.includes(c) ? prev.filter((x) => x !== c) : [...prev, c])
   }
 
+  const mapYearRangeToLabelYear = (range) => {
+    // crude label mapping for header tag
+    if (!range) return '2024'
+    if (range.includes('Last')) return '2024'
+    return range
+  }
+
   const onBegin = () => {
-    // For now, just close the modal. Later we can route to practice with these filters.
     setFlowOpen(false)
+    // navigate to practice screen with selected filters
+    const subjectLabel = selectedSubject.replace(' PYQs', '').replace('All Subjects (PCM)', 'PCM') || 'Maths'
+    navigate('/practice', {
+      state: {
+        examLabel: `${selectedExam || 'JEE Main'} 2024 April`,
+        subjectLabel: subjectLabel || 'Maths',
+        yearLabel: mapYearRangeToLabelYear(selectedYearRange),
+        selectedChapters,
+      }
+    })
   }
 
   const onSelectAll = () => {
