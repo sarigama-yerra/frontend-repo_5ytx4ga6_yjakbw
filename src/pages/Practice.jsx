@@ -1,4 +1,4 @@
-import React, { useMemo, useState } from 'react'
+import React, { useMemo, useState, useEffect } from 'react'
 import { InlineMath, BlockMath } from 'react-katex'
 import 'katex/dist/katex.min.css'
 import { ChevronLeft, ChevronRight } from 'lucide-react'
@@ -53,34 +53,52 @@ export default function Practice() {
   const [selected, setSelected] = useState(null)
   const [submitted, setSubmitted] = useState(false)
   const [isCorrect, setIsCorrect] = useState(false)
+  const [attempts, setAttempts] = useState(() => questions.map(() => ({ selected: null, correct: null })))
 
   const q = questions[index]
+
+  // When index changes, load previous attempt state for that question
+  useEffect(() => {
+    const a = attempts[index]
+    if (a) {
+      setSelected(a.selected)
+      setSubmitted(a.correct !== null)
+      setIsCorrect(a.correct === true)
+    }
+  }, [index])
 
   const handleSubmit = () => {
     if (selected == null) return
     const correct = selected === q.answerKey
     setIsCorrect(correct)
     setSubmitted(true)
+    setAttempts((prev) => {
+      const next = [...prev]
+      next[index] = { selected, correct }
+      return next
+    })
   }
 
   const goNext = () => {
     if (index < questions.length - 1) {
       setIndex((i) => i + 1)
-      setSelected(null)
-      setSubmitted(false)
-      setIsCorrect(false)
     } else {
-      // Finished - send back to selection screen for now
-      navigate('/solve')
+      // Finished -> navigate to report
+      navigate('/report', {
+        state: {
+          examLabel,
+          subjectLabel,
+          yearLabel,
+          questions,
+          attempts,
+        }
+      })
     }
   }
 
   const goPrev = () => {
     if (index > 0) {
       setIndex((i) => i - 1)
-      setSelected(null)
-      setSubmitted(false)
-      setIsCorrect(false)
     } else {
       navigate('/solve')
     }
