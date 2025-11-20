@@ -158,7 +158,7 @@ function ExamsGrid() {
               <div className="h-10 w-10 rounded-xl bg-slate-50 grid place-items-center ring-1 ring-slate-200"> <ChevronRight className="h-5 w-5 text-slate-500"/> </div>
             </div>
           </a>
-        )))}
+        ))}
       </div>
 
       {/* Carousel arrows on right */}
