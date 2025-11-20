@@ -170,9 +170,12 @@ function ExamsGrid({ onSelectExam }) {
   )
 }
 
-function FlowModal({ open, onClose, step, onBack, onNext, onSelectSubject, onSelectYear, selectedExam, selectedSubject, selectedYearRange, chapters, selectedChapters, onToggleChapter, onBegin }) {
+function FlowModal({ open, onClose, step, onBack, onNext, onSelectSubject, onSelectYear, selectedExam, selectedSubject, selectedYearRange, chapters, selectedChapters, onToggleChapter, onBegin, onSelectAll }) {
+  const [query, setQuery] = useState('')
   const subjectOptions = ['All Subjects (PCM)', 'Maths PYQs', 'Chemistry PYQs', 'Physics PYQs']
   const yearOptions = ['Last year', 'Last 3 years', 'Last 5 years', 'Last 10 years', 'Last 15 years']
+
+  const filteredChapters = chapters.filter((c) => c.toLowerCase().includes(query.toLowerCase()))
 
   return (
     <AnimatePresence>
@@ -231,9 +234,23 @@ function FlowModal({ open, onClose, step, onBack, onNext, onSelectSubject, onSel
 
                 {step === 'chapters' && (
                   <div className="space-y-4">
-                    <div className="text-sm text-slate-600">Choose chapters to include in your practice set.</div>
+                    {/* Search + Select All */}
+                    <div className="flex items-center gap-3">
+                      <input
+                        type="text"
+                        value={query}
+                        onChange={(e) => setQuery(e.target.value)}
+                        placeholder="Search topics…"
+                        className="flex-1 h-10 rounded-lg border border-slate-200 bg-white px-3 text-sm placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-[#1A73E8]/30 focus:border-[#1A73E8]"
+                      />
+                      <button type="button" onClick={onSelectAll} className="text-[#1A73E8] text-sm font-medium hover:underline">Select All</button>
+                    </div>
+
                     <div className="max-h-72 overflow-y-auto rounded-xl ring-1 ring-slate-200 divide-y divide-slate-100">
-                      {chapters.map((c) => {
+                      {filteredChapters.length === 0 && (
+                        <div className="px-4 py-6 text-sm text-slate-500">No topics match your search.</div>
+                      )}
+                      {filteredChapters.map((c) => {
                         const checked = selectedChapters.includes(c)
                         return (
                           <label key={c} className="flex items-center gap-3 px-4 py-3 cursor-pointer hover:bg-slate-50">
@@ -336,6 +353,10 @@ export default function SolvePage() {
     setFlowOpen(false)
   }
 
+  const onSelectAll = () => {
+    setSelectedChapters(chapters)
+  }
+
   return (
     <div className="min-h-screen bg-[#F5F8FF] text-slate-900">
       {/* soft halo */}
@@ -419,6 +440,7 @@ export default function SolvePage() {
         selectedChapters={selectedChapters}
         onToggleChapter={onToggleChapter}
         onBegin={onBegin}
+        onSelectAll={onSelectAll}
       />
     </div>
   )
