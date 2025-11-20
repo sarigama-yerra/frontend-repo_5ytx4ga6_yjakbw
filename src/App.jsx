@@ -3,11 +3,6 @@ import Hero from './components/Hero'
 import Features from './components/Features'
 
 function App() {
-  const handleCTAClick = () => {
-    const el = document.getElementById('signup')
-    if (el) el.scrollIntoView({ behavior: 'smooth', block: 'start' })
-  }
-
   return (
     <div className="min-h-screen bg-[#F5F8FF] text-slate-900">
       {/* soft gradient halo */}
@@ -16,7 +11,7 @@ function App() {
       </div>
 
       <Navbar />
-      <Hero onCTAClick={handleCTAClick} />
+      <Hero />
       <Features />
     </div>
   )

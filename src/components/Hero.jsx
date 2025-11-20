@@ -1,7 +1,15 @@
 import { motion } from 'framer-motion'
 import { CheckCircle2 } from 'lucide-react'
+import { useNavigate } from 'react-router-dom'
+import React from 'react'
 
-function Hero({ onCTAClick }) {
+function Hero() {
+  const navigate = useNavigate()
+
+  const handleStart = () => {
+    navigate('/solve')
+  }
+
   return (
     <section className="relative overflow-hidden">
       {/* Faint background of blurred question paper */}
@@ -88,7 +96,7 @@ function Hero({ onCTAClick }) {
               className="mt-8"
             >
               <button
-                onClick={onCTAClick}
+                onClick={handleStart}
                 className="inline-flex items-center justify-center rounded-full bg-[#1A73E8] px-6 py-3 text-white font-semibold shadow-[0_14px_28px_rgba(26,115,232,0.35)] hover:shadow-[0_16px_34px_rgba(26,115,232,0.45)] focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-[#1A73E8]"
               >
                 Start Solving PYQs
@@ -143,8 +151,6 @@ function TestimonialSlider() {
     </motion.div>
   )
 }
-
-import React from 'react'
 
 function SignupCard() {
   return (
