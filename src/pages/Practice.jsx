@@ -1,4 +1,4 @@
-import React, { useState } from 'react'
+import React, { useMemo, useState } from 'react'
 import { InlineMath, BlockMath } from 'react-katex'
 import 'katex/dist/katex.min.css'
 import { ChevronLeft, ChevronRight } from 'lucide-react'
@@ -12,16 +12,79 @@ export default function Practice() {
   const subjectLabel = params.subjectLabel || 'Maths'
   const yearLabel = params.yearLabel || '2024'
 
-  // Simple demo question
-  const questionLatex = String.raw`\text{If } f(x)=x^3-3x^2+2x,\ \text{ then } f'(x) \text{ at } x=2 \text{ equals } ?`
-  const options = [
-    { key: 'A', text: String.raw`2` },
-    { key: 'B', text: String.raw`3` },
-    { key: 'C', text: String.raw`4` },
-    { key: 'D', text: String.raw`5` },
-  ]
+  // Demo question set
+  const questions = useMemo(() => [
+    {
+      id: 1,
+      promptLatex: String.raw`\\text{If } f(x)=x^3-3x^2+2x,\\ \\text{ then } f'(x) \\text{ at } x=2 \\text{ equals } ?`,
+      options: [
+        { key: 'A', text: String.raw`2` },
+        { key: 'B', text: String.raw`3` },
+        { key: 'C', text: String.raw`4` },
+        { key: 'D', text: String.raw`5` },
+      ],
+      answerKey: 'C',
+    },
+    {
+      id: 2,
+      promptLatex: String.raw`\\text{The value of } \\int_0^1 (2x+1) \\; dx \\text{ is } ?`,
+      options: [
+        { key: 'A', text: String.raw`1` },
+        { key: 'B', text: String.raw`2` },
+        { key: 'C', text: String.raw`3/2` },
+        { key: 'D', text: String.raw`5/2` },
+      ],
+      answerKey: 'B',
+    },
+    {
+      id: 3,
+      promptLatex: String.raw`\\text{If } \\sin^2\\theta + \\cos^2\\theta = 1, \\text{ then } \\sin^2\\theta + \\cos^2\\theta \\text{ equals } ?`,
+      options: [
+        { key: 'A', text: String.raw`0` },
+        { key: 'B', text: String.raw`1` },
+        { key: 'C', text: String.raw`2` },
+        { key: 'D', text: String.raw`-1` },
+      ],
+      answerKey: 'B',
+    },
+  ], [])
 
+  const [index, setIndex] = useState(0)
   const [selected, setSelected] = useState(null)
+  const [submitted, setSubmitted] = useState(false)
+  const [isCorrect, setIsCorrect] = useState(false)
+
+  const q = questions[index]
+
+  const handleSubmit = () => {
+    if (selected == null) return
+    const correct = selected === q.answerKey
+    setIsCorrect(correct)
+    setSubmitted(true)
+  }
+
+  const goNext = () => {
+    if (index < questions.length - 1) {
+      setIndex((i) => i + 1)
+      setSelected(null)
+      setSubmitted(false)
+      setIsCorrect(false)
+    } else {
+      // Finished - send back to selection screen for now
+      navigate('/solve')
+    }
+  }
+
+  const goPrev = () => {
+    if (index > 0) {
+      setIndex((i) => i - 1)
+      setSelected(null)
+      setSubmitted(false)
+      setIsCorrect(false)
+    } else {
+      navigate('/solve')
+    }
+  }
 
   return (
     <div className="min-h-screen bg-[#F5F8FF] text-slate-900">
@@ -66,28 +129,50 @@ export default function Practice() {
               <div className="shrink-0 inline-flex items-center gap-2 sm:hidden">
                 <span className="inline-flex items-center rounded-full bg-sky-50 text-sky-700 ring-1 ring-sky-200 px-3 py-1 text-xs font-semibold">{subjectLabel}</span>
               </div>
-              <div className="hidden sm:block text-sm text-slate-500">Question 1</div>
+              <div className="hidden sm:block text-sm text-slate-500">Question {index + 1} of {questions.length}</div>
             </div>
 
             {/* Body: Question */}
             <div className="px-5 sm:px-6 py-5 sm:py-6">
-              <div className="sm:hidden text-sm text-slate-500 mb-2">Question 1</div>
+              <div className="sm:hidden text-sm text-slate-500 mb-2">Question {index + 1} of {questions.length}</div>
               <div className="rounded-xl bg-white p-4 ring-1 ring-slate-200 shadow-sm">
-                <BlockMath math={questionLatex} />
+                <BlockMath math={q.promptLatex} />
               </div>
 
               {/* Options - single column */}
               <div className="mt-5 flex flex-col gap-3">
-                {options.map((opt) => {
-                  const active = selected === opt.key
+                {q.options.map((opt) => {
+                  const isOptionCorrect = opt.key === q.answerKey
+                  const isOptionSelected = selected === opt.key
+                  let ring = 'ring-slate-200'
+                  let bg = 'bg-white'
+                  if (!submitted) {
+                    if (isOptionSelected) {
+                      ring = 'ring-sky-300'
+                      bg = 'bg-sky-50'
+                    }
+                  } else {
+                    if (isOptionCorrect) {
+                      ring = 'ring-green-300'
+                      bg = 'bg-green-50'
+                    } else if (isOptionSelected && !isOptionCorrect) {
+                      ring = 'ring-red-300'
+                      bg = 'bg-red-50'
+                    } else {
+                      ring = 'ring-slate-200'
+                      bg = 'bg-white'
+                    }
+                  }
+
                   return (
                     <button
                       key={opt.key}
-                      onClick={() => setSelected(opt.key)}
-                      className={`group relative text-left rounded-xl px-4 py-3 ring-1 transition-all ${active ? 'bg-sky-50 ring-sky-300' : 'bg-white ring-slate-200 hover:bg-slate-50'}`}
+                      onClick={() => !submitted && setSelected(opt.key)}
+                      disabled={submitted}
+                      className={`group relative text-left rounded-xl px-4 py-3 ring-1 transition-all ${bg} ${ring} ${submitted ? 'cursor-not-allowed opacity-95' : 'hover:bg-slate-50'}`}
                     >
                       <div className="flex items-start gap-3">
-                        <div className={`mt-0.5 h-6 w-6 shrink-0 grid place-items-center rounded-full border text-xs font-bold ${active ? 'bg-[#1A73E8] text-white border-[#1A73E8]' : 'bg-white text-slate-700 border-slate-300'}`}>{opt.key}</div>
+                        <div className={`mt-0.5 h-6 w-6 shrink-0 grid place-items-center rounded-full border text-xs font-bold ${submitted ? (isOptionCorrect ? 'bg-green-600 text-white border-green-600' : (isOptionSelected ? 'bg-red-600 text-white border-red-600' : 'bg-white text-slate-700 border-slate-300')) : (isOptionSelected ? 'bg-[#1A73E8] text-white border-[#1A73E8]' : 'bg-white text-slate-700 border-slate-300')}`}>{opt.key}</div>
                         <div className="text-slate-800">
                           <InlineMath math={opt.text} />
                         </div>
@@ -96,6 +181,13 @@ export default function Practice() {
                   )
                 })}
               </div>
+
+              {/* Feedback */}
+              {submitted && (
+                <div className={`mt-4 text-sm font-medium ${isCorrect ? 'text-green-700' : 'text-red-700'}`}>
+                  {isCorrect ? 'Correct!' : `Incorrect. Correct answer is ${q.answerKey}.`}
+                </div>
+              )}
             </div>
           </div>
 
@@ -112,12 +204,22 @@ export default function Practice() {
             <span className="inline-flex items-center rounded-full bg-slate-100 px-2.5 py-1 ring-1 ring-slate-200">Year is {yearLabel}</span>
           </div>
           <div className="flex items-center gap-2 w-full sm:w-auto order-1 sm:order-2">
-            <button onClick={() => navigate(-1)} className="inline-flex items-center justify-center gap-2 h-10 px-4 rounded-lg bg-white ring-1 ring-slate-200 text-slate-700 hover:bg-slate-50">
+            <button onClick={goPrev} className={`inline-flex items-center justify-center gap-2 h-10 px-4 rounded-lg bg-white ring-1 ring-slate-200 text-slate-700 ${index === 0 ? 'opacity-60' : 'hover:bg-slate-50'}`}>
               <ChevronLeft className="h-4 w-4" /> Previous
             </button>
-            <button className="inline-flex items-center justify-center gap-2 h-10 px-4 rounded-lg bg-[#1A73E8] text-white hover:bg-[#1667d3]">
-              Next <ChevronRight className="h-4 w-4" />
-            </button>
+            {!submitted ? (
+              <button onClick={handleSubmit} disabled={selected == null} className={`inline-flex items-center justify-center gap-2 h-10 px-4 rounded-lg ${selected == null ? 'bg-slate-300 text-white cursor-not-allowed' : 'bg-[#1A73E8] text-white hover:bg-[#1667d3]'}`}>
+                Submit
+              </button>
+            ) : (
+              <button onClick={goNext} className="inline-flex items-center justify-center gap-2 h-10 px-4 rounded-lg bg-[#1A73E8] text-white hover:bg-[#1667d3]">
+                {index < questions.length - 1 ? (
+                  <>Next <ChevronRight className="h-4 w-4" /></>
+                ) : (
+                  'Finish'
+                )}
+              </button>
+            )}
           </div>
         </div>
       </div>
