@@ -52,7 +52,7 @@ export default function Practice() {
             </div>
 
             {/* Options */}
-            <div className="mt-5 grid grid-cols-1 sm:grid-cols-2 gap-3">
+            <div className="mt-5 flex flex-col gap-3">
               {options.map((opt) => {
                 const active = selected === opt.key
                 return (
