@@ -189,6 +189,25 @@ function ExamsGrid({ onSelectExam }) {
   )
 }
 
+function MockExamsGrid({ onSelect }) {
+  const exams = ['JEE Mains', 'JEE Advanced', 'MH CET', 'BITSAT', 'KCET', 'WBJEE']
+  return (
+    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+      {exams.map((e) => (
+        <button key={e} onClick={() => onSelect(e)} className="text-left group rounded-2xl bg-white p-5 ring-1 ring-slate-200 shadow-[12px_12px_36px_rgba(0,0,0,0.06),-10px_-10px_36px_rgba(255,255,255,0.9)] hover:shadow-[16px_16px_48px_rgba(0,0,0,0.08),-12px_-12px_44px_rgba(255,255,255,1)] transition">
+          <div className="flex items-center justify-between">
+            <div>
+              <div className="font-semibold text-slate-900">{e}</div>
+              <div className="text-sm text-slate-500">Full-length mock paper</div>
+            </div>
+            <div className="h-10 w-10 rounded-xl bg-slate-50 grid place-items-center ring-1 ring-slate-200"> <ChevronRight className="h-5 w-5 text-slate-500"/> </div>
+          </div>
+        </button>
+      ))}
+    </div>
+  )
+}
+
 function FlowModal({ open, onClose, step, onBack, onNext, onSelectSubject, onSelectYear, selectedExam, selectedSubject, selectedYearRange, chapters, selectedChapters, onToggleChapter, onBegin, onSelectAll }) {
   const [query, setQuery] = useState('')
   const subjectOptions = ['All Subjects (PCM)', 'Maths PYQs', 'Chemistry PYQs', 'Physics PYQs']
@@ -318,7 +337,7 @@ function FlowModal({ open, onClose, step, onBack, onNext, onSelectSubject, onSel
 
 function MockFlowModal({ open, onClose, step, selectedMockExam, setSelectedMockExam, selectedMockSubject, setSelectedMockSubject, selectedMockDate, setSelectedMockDate, onBack, onStart }) {
   const exams = ['JEE Mains', 'JEE Advanced', 'MH CET', 'BITSAT', 'KCET', 'WBJEE']
-  const subjects = ['Maths', 'Physics', 'Chemistry']
+  const subjects = ['All Subjects (PCM)', 'Maths', 'Physics', 'Chemistry']
   const dates = [
     '2025 2 April Shift 1',
     '2025 2 April Shift 2',
@@ -368,7 +387,7 @@ function MockFlowModal({ open, onClose, step, selectedMockExam, setSelectedMockE
                 )}
 
                 {step === 'subject' && (
-                  <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                     {subjects.map((s) => (
                       <button key={s} onClick={() => setSelectedMockSubject(s)} className={`text-left rounded-xl p-4 ring-1 transition shadow-sm hover:shadow-md ${selectedMockSubject === s ? 'ring-[#1A73E8] bg-[#1A73E8]/5' : 'ring-slate-200 bg-white'}`}>
                         <div className="font-medium text-slate-900">{s}</div>
@@ -547,6 +566,14 @@ export default function SolvePage() {
     }
   }
 
+  const onSelectMockExam = (exam) => {
+    setMockExam(exam)
+    setMockSubject('')
+    setMockDate('')
+    setMockStep('subject')
+    setMockOpen(true)
+  }
+
   return (
     <div className="min-h-screen bg-[#F5F8FF] text-slate-900">
       {/* soft halo */}
@@ -612,20 +639,11 @@ export default function SolvePage() {
 
               {/* Mock Test Section (independent flow) */}
               <section className="mt-8 sm:mt-10 mb-20">
-                <div className="mb-3 flex items-center justify-between">
+                <div className="mb-3">
                   <h2 className="text-lg font-semibold text-slate-900">Give Mock Test</h2>
+                  <p className="text-sm text-slate-600 mt-1">Select an exam to continue</p>
                 </div>
-                <div className="rounded-2xl bg-white p-5 ring-1 ring-slate-200 shadow-[12px_12px_36px_rgba(0,0,0,0.06),-10px_-10px_36px_rgba(255,255,255,0.9)]">
-                  <div className="flex items-center justify-between gap-3">
-                    <div>
-                      <div className="font-semibold text-slate-900">Attempt full-length mock</div>
-                      <div className="text-sm text-slate-500">Choose exam → subject → exam date</div>
-                    </div>
-                    <button onClick={openMock} className="inline-flex items-center gap-2 h-10 px-4 rounded-lg bg-[#1A73E8] text-white hover:bg-[#1667d3]">
-                      Start <ChevronRight className="h-4 w-4"/>
-                    </button>
-                  </div>
-                </div>
+                <MockExamsGrid onSelect={onSelectMockExam} />
               </section>
             </div>
           </div>
