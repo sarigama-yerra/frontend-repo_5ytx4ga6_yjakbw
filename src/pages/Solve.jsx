@@ -331,7 +331,7 @@ function FlowModal({ open, onClose, step, onBack, onNext, onSelectSubject, onSel
                             <span className="flex-1 text-sm text-slate-800">{c}</span>
                             {checked && <Check className="h-4 w-4 text-[#1A73E8]"/>}
                           </label>
-                        )}
+                        )
                       })}
                     </div>
                   </div>
