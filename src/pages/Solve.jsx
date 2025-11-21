@@ -1,14 +1,11 @@
 import React, { useState } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
-import { Home, Trophy, Bookmark, GraduationCap, ChevronRight, ChevronLeft, ChevronDown, Grid3X3, Menu, X, Check, CalendarDays, Lock } from 'lucide-react'
+import { Home, GraduationCap, ChevronRight, ChevronLeft, ChevronDown, Grid3X3, Menu, X, Check, CalendarDays, Lock } from 'lucide-react'
 import { useNavigate } from 'react-router-dom'
 
 function Sidebar() {
   const menu = [
     { label: 'Home', icon: Home },
-    { label: 'Leaderboard', icon: Trophy },
-    { label: 'Newton School of Technology', icon: GraduationCap },
-    { label: 'Saved Questions', icon: Bookmark },
     { label: 'College Predictor', icon: GraduationCap, locked: true },
     { label: 'College Counselling', icon: GraduationCap, locked: true },
   ]
@@ -61,9 +58,6 @@ function Sidebar() {
 function MobileSidebar({ open, onClose }) {
   const menu = [
     { label: 'Home', icon: Home },
-    { label: 'Leaderboard', icon: Trophy },
-    { label: 'Newton School of Technology', icon: GraduationCap },
-    { label: 'Saved Questions', icon: Bookmark },
     { label: 'College Predictor', icon: GraduationCap, locked: true },
     { label: 'College Counselling', icon: GraduationCap, locked: true },
   ]
@@ -337,7 +331,7 @@ function FlowModal({ open, onClose, step, onBack, onNext, onSelectSubject, onSel
                             <span className="flex-1 text-sm text-slate-800">{c}</span>
                             {checked && <Check className="h-4 w-4 text-[#1A73E8]"/>}
                           </label>
-                        )
+                        )}
                       })}
                     </div>
                   </div>
