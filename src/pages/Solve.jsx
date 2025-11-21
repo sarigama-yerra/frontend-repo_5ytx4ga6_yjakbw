@@ -1,6 +1,6 @@
 import React, { useState } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
-import { Home, Trophy, Bookmark, GraduationCap, ChevronRight, ChevronLeft, ChevronDown, Grid3X3, Menu, X, Check } from 'lucide-react'
+import { Home, Trophy, Bookmark, GraduationCap, ChevronRight, ChevronLeft, ChevronDown, Grid3X3, Menu, X, Check, CalendarDays } from 'lucide-react'
 import { useNavigate } from 'react-router-dom'
 
 function Sidebar() {
@@ -316,6 +316,53 @@ function FlowModal({ open, onClose, step, onBack, onNext, onSelectSubject, onSel
   )
 }
 
+function MockModal({ open, onClose, selectedExam, selectedDate, onSelectDate, onBeginMock }) {
+  const dates = [
+    '2025 2 April Shift 1',
+    '2025 2 April Shift 2',
+    '2025 3 April Shift 1',
+    '2025 3 April Shift 2',
+  ]
+
+  return (
+    <AnimatePresence>
+      {open && (
+        <>
+          <motion.div className="fixed inset-0 z-[90] bg-black/40" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} onClick={onClose} />
+          <motion.div className="fixed inset-0 z-[95] grid place-items-center px-4" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}>
+            <motion.div className="w-full max-w-lg overflow-hidden rounded-2xl bg-white ring-1 ring-slate-200 shadow-[24px_24px_64px_rgba(0,0,0,0.12),-16px_-16px_48px_rgba(255,255,255,0.9)]" initial={{ y: 20, scale: 0.98 }} animate={{ y: 0, scale: 1 }} exit={{ y: 20, opacity: 0 }} transition={{ type: 'spring', stiffness: 260, damping: 24 }}>
+              <div className="flex items-center justify-between px-5 py-4 border-b border-slate-200/80 bg-gradient-to-b from-white to-slate-50/60">
+                <div>
+                  <div className="text-xs uppercase tracking-wide text-slate-500">{selectedExam}</div>
+                  <div className="font-semibold text-slate-900">Select Exam Date</div>
+                </div>
+                <button onClick={onClose} className="h-9 w-9 grid place-items-center rounded-lg bg-white ring-1 ring-slate-200 hover:bg-slate-50"><X className="h-5 w-5"/></button>
+              </div>
+
+              <div className="px-5 py-4 space-y-3">
+                {dates.map((d) => (
+                  <button key={d} onClick={() => onSelectDate(d)} className={`w-full text-left rounded-xl p-4 ring-1 transition shadow-sm hover:shadow-md flex items-center gap-3 ${selectedDate === d ? 'ring-[#1A73E8] bg-[#1A73E8]/5' : 'ring-slate-200 bg-white'}`}>
+                    <CalendarDays className="h-5 w-5 text-slate-500" />
+                    <div>
+                      <div className="font-medium text-slate-900">{d}</div>
+                      <div className="text-xs text-slate-500">Full-length mock paper</div>
+                    </div>
+                  </button>
+                ))}
+              </div>
+
+              <div className="px-5 py-4 bg-slate-50/60 border-t border-slate-200/80 flex items-center justify-between">
+                <div className="text-xs text-slate-500">No categories, full exam with timer</div>
+                <button disabled={!selectedDate} onClick={onBeginMock} className={`h-9 px-4 rounded-lg text-sm font-semibold transition ${selectedDate ? 'bg-[#1A73E8] text-white hover:bg-[#1667d3]' : 'bg-slate-200 text-slate-500 cursor-not-allowed'}`}>Start Mock Test</button>
+              </div>
+            </motion.div>
+          </motion.div>
+        </>
+      )}
+    </AnimatePresence>
+  )
+}
+
 export default function SolvePage() {
   const [sidebarOpen, setSidebarOpen] = useState(false)
   const navigate = useNavigate()
@@ -327,6 +374,10 @@ export default function SolvePage() {
   const [selectedSubject, setSelectedSubject] = useState('')
   const [selectedYearRange, setSelectedYearRange] = useState('')
   const [selectedChapters, setSelectedChapters] = useState([])
+
+  // Mock test state
+  const [mockOpen, setMockOpen] = useState(false)
+  const [mockDate, setMockDate] = useState('')
 
   const subjectChapters = {
     'All Subjects (PCM)': ['Kinematics', 'Laws of Motion', 'Work, Power & Energy', 'Limits & Continuity', 'Differentiation', 'Integration', 'Atomic Structure', 'Chemical Bonding', 'Equilibrium'],
@@ -389,6 +440,7 @@ export default function SolvePage() {
     const subjectLabel = selectedSubject.replace(' PYQs', '').replace('All Subjects (PCM)', 'PCM') || 'Maths'
     navigate('/practice', {
       state: {
+        mode: 'Practice',
         examLabel: `${selectedExam || 'JEE Main'} 2024 April`,
         subjectLabel: subjectLabel || 'Maths',
         yearLabel: mapYearRangeToLabelYear(selectedYearRange),
@@ -399,6 +451,32 @@ export default function SolvePage() {
 
   const onSelectAll = () => {
     setSelectedChapters(chapters)
+  }
+
+  const durationBySubject = {
+    'Maths PYQs': 90,
+    'Physics PYQs': 60,
+    'Chemistry PYQs': 30,
+  }
+
+  const openMock = () => {
+    setMockOpen(true)
+    setMockDate('')
+  }
+
+  const beginMock = () => {
+    const subjectLabel = selectedSubject ? selectedSubject.replace(' PYQs', '') : 'PCM'
+    const durationMinutes = durationBySubject[selectedSubject] || 180
+    setMockOpen(false)
+    navigate('/practice', {
+      state: {
+        mode: 'Mock',
+        examLabel: `${selectedExam} ${mockDate}`,
+        subjectLabel,
+        yearLabel: mockDate,
+        durationMinutes,
+      }
+    })
   }
 
   return (
@@ -463,6 +541,26 @@ export default function SolvePage() {
                 </div>
                 <ExamsGrid onSelectExam={(e) => openFlowForExam(e)} />
               </section>
+
+              {/* Mock Test Section */}
+              <section className="mt-8 sm:mt-10 mb-20">
+                <div className="mb-3 flex items-center justify-between">
+                  <h2 className="text-lg font-semibold text-slate-900">Give Mock Test</h2>
+                </div>
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                  {[ '2025 2 April', '2025 3 April' ].map((d) => (
+                    <button key={d} onClick={openMock} className="text-left group rounded-2xl bg-white p-5 ring-1 ring-slate-200 shadow-[12px_12px_36px_rgba(0,0,0,0.06),-10px_-10px_36px_rgba(255,255,255,0.9)] hover:shadow-[16px_16px_48px_rgba(0,0,0,0.08),-12px_-12px_44px_rgba(255,255,255,1)] transition">
+                      <div className="flex items-center justify-between">
+                        <div>
+                          <div className="font-semibold text-slate-900">{selectedExam} Mock</div>
+                          <div className="text-sm text-slate-500">Pick a date and start full test</div>
+                        </div>
+                        <div className="h-10 w-10 rounded-xl bg-slate-50 grid place-items-center ring-1 ring-slate-200"> <CalendarDays className="h-5 w-5 text-slate-500"/> </div>
+                      </div>
+                    </button>
+                  ))}
+                </div>
+              </section>
             </div>
           </div>
         </main>
@@ -485,6 +583,16 @@ export default function SolvePage() {
         onToggleChapter={onToggleChapter}
         onBegin={onBegin}
         onSelectAll={onSelectAll}
+      />
+
+      {/* Mock Test Modal */}
+      <MockModal
+        open={mockOpen}
+        onClose={() => setMockOpen(false)}
+        selectedExam={selectedExam}
+        selectedDate={mockDate}
+        onSelectDate={(d) => setMockDate(d)}
+        onBeginMock={beginMock}
       />
     </div>
   )
