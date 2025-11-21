@@ -363,7 +363,7 @@ function MockFlowModal({ open, onClose, step, selectedMockExam, setSelectedMockE
             <motion.div className="w-full max-w-lg overflow-hidden rounded-2xl bg-white ring-1 ring-slate-200 shadow-[24px_24px_64px_rgba(0,0,0,0.12),-16px_-16px_48px_rgba(255,255,255,0.9)]" initial={{ y: 20, scale: 0.98 }} animate={{ y: 0, scale: 1 }} exit={{ y: 20, opacity: 0 }} transition={{ type: 'spring', stiffness: 260, damping: 24 }}>
               <div className="flex items-center justify-between px-5 py-4 border-b border-slate-200/80 bg-gradient-to-b from-white to-slate-50/60">
                 <div>
-                  <div className="text-xs uppercase tracking-wide text-slate-500">Mock Test</div>
+                  <div className="text-xs uppercase tracking-wide text-slate-500">{selectedMockExam || 'Mock Test'}</div>
                   <div className="font-semibold text-slate-900">{headerTitle}</div>
                 </div>
                 <div className="flex items-center gap-2">
