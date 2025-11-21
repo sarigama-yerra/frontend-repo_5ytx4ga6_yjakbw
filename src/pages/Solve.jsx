@@ -102,6 +102,7 @@ function MobileSidebar({ open, onClose }) {
 }
 
 function ExamSelector({ selectedExam, onChange }) {
+  const exams = ['JEE Mains', 'JEE Advanced', 'MH CET', 'BITSAT', 'KCET', 'WBJEE']
   return (
     <div className="rounded-2xl bg-white p-4 sm:p-5 ring-1 ring-slate-200 shadow-[16px_16px_48px_rgba(0,0,0,0.06),-12px_-12px_44px_rgba(255,255,255,0.9)]">
       <div className="flex items-center justify-between flex-wrap gap-3">
@@ -109,36 +110,53 @@ function ExamSelector({ selectedExam, onChange }) {
           <div className="text-sm text-slate-500">Exam</div>
           <div className="mt-1 inline-flex items-center gap-2 rounded-full bg-[#1A73E8]/10 text-[#1A73E8] px-3 py-1.5 font-semibold">
             <Grid3X3 className="h-4 w-4" />
-            <span>{selectedExam || 'JEE Main'}</span>
+            <span>{selectedExam}</span>
           </div>
         </div>
-        <button onClick={onChange} className="inline-flex items-center gap-2 rounded-full bg-slate-50 px-3 py-2 text-sm text-slate-700 ring-1 ring-slate-200 hover:bg-slate-100 transition">
-          Change <ChevronDown className="h-4 w-4 text-slate-500" />
-        </button>
+        <div className="flex items-center gap-2">
+          <label htmlFor="exam" className="sr-only">Select exam</label>
+          <div className="relative">
+            <select
+              id="exam"
+              value={selectedExam}
+              onChange={(e) => onChange(e.target.value)}
+              className="appearance-none h-10 pl-3 pr-9 rounded-lg bg-white border border-slate-200 text-sm text-slate-800 focus:outline-none focus:ring-2 focus:ring-[#1A73E8]/30 focus:border-[#1A73E8]"
+            >
+              {exams.map((e) => (
+                <option key={e} value={e}>{e}</option>
+              ))}
+            </select>
+            <ChevronDown className="pointer-events-none absolute right-2 top-1/2 -translate-y-1/2 h-4 w-4 text-slate-500" />
+          </div>
+        </div>
       </div>
     </div>
   )
 }
 
-function SubjectCards() {
+function SubjectCards({ onChoose }) {
   const items = [
-    { title: 'All Subjects (PCM)', desc: 'Practice combined', accent: 'from-sky-500 to-blue-600' },
-    { title: 'Maths PYQs', desc: 'Algebra, Calculus, more', accent: 'from-emerald-500 to-teal-600' },
-    { title: 'Chemistry PYQs', desc: 'Physical, Organic, Inorganic', accent: 'from-amber-500 to-orange-600' },
-    { title: 'Physics PYQs', desc: 'Mechanics to Modern', accent: 'from-violet-500 to-fuchsia-600' },
+    { key: 'All Subjects (PCM)', title: 'All Subjects (PCM)', desc: 'Practice combined', accent: 'from-sky-500 to-blue-600' },
+    { key: 'Maths PYQs', title: 'Maths PYQs', desc: 'Algebra, Calculus, more', accent: 'from-emerald-500 to-teal-600' },
+    { key: 'Chemistry PYQs', title: 'Chemistry PYQs', desc: 'Physical, Organic, Inorganic', accent: 'from-amber-500 to-orange-600' },
+    { key: 'Physics PYQs', title: 'Physics PYQs', desc: 'Mechanics to Modern', accent: 'from-violet-500 to-fuchsia-600' },
   ]
 
   return (
     <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-      {items.map((it, i) => (
-        <a key={i} href="#" className="group rounded-2xl bg-white p-4 ring-1 ring-slate-200 shadow-[12px_12px_36px_rgba(0,0,0,0.06),-10px_-10px_36px_rgba(255,255,255,0.9)] hover:shadow-[16px_16px_48px_rgba(0,0,0,0.08),-12px_-12px_44px_rgba(255,255,255,1)] transition">
+      {items.map((it) => (
+        <button
+          key={it.key}
+          onClick={() => onChoose(it.key)}
+          className="text-left group rounded-2xl bg-white p-4 ring-1 ring-slate-200 shadow-[12px_12px_36px_rgba(0,0,0,0.06),-10px_-10px_36px_rgba(255,255,255,0.9)] hover:shadow-[16px_16px_48px_rgba(0,0,0,0.08),-12px_-12px_44px_rgba(255,255,255,1)] transition"
+        >
           <div className={`h-10 w-10 rounded-xl bg-gradient-to-br ${it.accent} text-white grid place-items-center shadow`}>↗</div>
           <div className="mt-3 font-semibold text-slate-900">{it.title}</div>
           <div className="text-sm text-slate-500">{it.desc}</div>
           <div className="mt-3 inline-flex items-center gap-1 text-[#1A73E8] font-medium">
             Start <ChevronRight className="h-4 w-4" />
           </div>
-        </a>
+        </button>
       ))}
     </div>
   )
@@ -274,9 +292,9 @@ function FlowModal({ open, onClose, step, onBack, onNext, onSelectSubject, onSel
               {/* Footer */}
               <div className="px-5 py-4 bg-slate-50/60 border-t border-slate-200/80 flex items-center justify-between">
                 <div className="text-xs text-slate-500">
-                  {step === 'subject' && 'Step 2 of 4'}
-                  {step === 'year' && 'Step 3 of 4'}
-                  {step === 'chapters' && 'Step 4 of 4'}
+                  {step === 'subject' && 'Step 1 of 3'}
+                  {step === 'year' && 'Step 2 of 3'}
+                  {step === 'chapters' && 'Step 3 of 3'}
                 </div>
                 <div className="flex items-center gap-2">
                   {step === 'subject' && (
@@ -305,7 +323,7 @@ export default function SolvePage() {
   // Flow state
   const [flowOpen, setFlowOpen] = useState(false)
   const [step, setStep] = useState('subject') // 'subject' | 'year' | 'chapters'
-  const [selectedExam, setSelectedExam] = useState('')
+  const [selectedExam, setSelectedExam] = useState('JEE Mains')
   const [selectedSubject, setSelectedSubject] = useState('')
   const [selectedYearRange, setSelectedYearRange] = useState('')
   const [selectedChapters, setSelectedChapters] = useState([])
@@ -319,11 +337,19 @@ export default function SolvePage() {
 
   const chapters = subjectChapters[selectedSubject] || []
 
-  const openFlow = (exam) => {
+  const openFlowForExam = (exam) => {
     setSelectedExam(exam)
     setFlowOpen(true)
     setStep('subject')
     setSelectedSubject('')
+    setSelectedYearRange('')
+    setSelectedChapters([])
+  }
+
+  const openFlowForSubject = (subject) => {
+    setSelectedSubject(subject)
+    setFlowOpen(true)
+    setStep('year') // start at year -> chapters
     setSelectedYearRange('')
     setSelectedChapters([])
   }
@@ -419,15 +445,15 @@ export default function SolvePage() {
                 <p className="mt-1 text-slate-600">Pick your exam and subject to jump right in.</p>
               </div>
 
-              {/* Exam Selector */}
-              <ExamSelector selectedExam={selectedExam || 'JEE Main'} onChange={() => openFlow(selectedExam || 'JEE Main')} />
+              {/* Exam Selector (first card) */}
+              <ExamSelector selectedExam={selectedExam} onChange={(val) => setSelectedExam(val)} />
 
               {/* Select Subject */}
               <section className="mt-6 sm:mt-8">
                 <div className="mb-3 flex items-center justify-between">
                   <h2 className="text-lg font-semibold text-slate-900">Select Subject</h2>
                 </div>
-                <SubjectCards />
+                <SubjectCards onChoose={(subj) => openFlowForSubject(subj)} />
               </section>
 
               {/* Top Engineering Exams */}
@@ -435,7 +461,7 @@ export default function SolvePage() {
                 <div className="mb-3 flex items-center justify-between">
                   <h2 className="text-lg font-semibold text-slate-900">Top Engineering Exams PYQs</h2>
                 </div>
-                <ExamsGrid onSelectExam={(e) => openFlow(e)} />
+                <ExamsGrid onSelectExam={(e) => openFlowForExam(e)} />
               </section>
             </div>
           </div>
