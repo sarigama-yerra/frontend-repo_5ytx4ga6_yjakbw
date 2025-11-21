@@ -238,12 +238,13 @@ function MockExamsGrid({ onSelect }) {
   )
 }
 
-function FlowModal({ open, onClose, step, onBack, onNext, onSelectSubject, onSelectYear, selectedExam, selectedSubject, selectedYearRange, chapters, selectedChapters, onToggleChapter, onBegin, onSelectAll }) {
+function FlowModal({ open, onClose, step, onBack, onNext, onSelectSubject, onSelectYear, selectedExam, selectedSubject, selectedYearRange, chapters, selectedChapters, onToggleChapter, onBegin, onSelectAll, onClearAll }) {
   const [query, setQuery] = useState('')
   const subjectOptions = ['All Subjects (PCM)', 'Maths PYQs', 'Chemistry PYQs', 'Physics PYQs']
   const yearOptions = ['Last year', 'Last 3 years', 'Last 5 years', 'Last 10 years', 'Last 15 years']
 
   const filteredChapters = chapters.filter((c) => c.toLowerCase().includes(query.toLowerCase()))
+  const allSelected = chapters.length > 0 && selectedChapters.length === chapters.length
 
   return (
     <AnimatePresence>
@@ -302,7 +303,7 @@ function FlowModal({ open, onClose, step, onBack, onNext, onSelectSubject, onSel
 
                 {step === 'chapters' && (
                   <div className="space-y-4">
-                    {/* Search + Select All */}
+                    {/* Search + Select All / Clear All */}
                     <div className="flex items-center gap-3">
                       <input
                         type="text"
@@ -311,7 +312,13 @@ function FlowModal({ open, onClose, step, onBack, onNext, onSelectSubject, onSel
                         placeholder="Search topics…"
                         className="flex-1 h-10 rounded-lg border border-slate-200 bg-white px-3 text-sm placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-[#1A73E8]/30 focus:border-[#1A73E8]"
                       />
-                      <button type="button" onClick={onSelectAll} className="text-[#1A73E8] text-sm font-medium hover:underline">Select All</button>
+                      <button
+                        type="button"
+                        onClick={allSelected ? onClearAll : onSelectAll}
+                        className="text-[#1A73E8] text-sm font-medium hover:underline"
+                      >
+                        {allSelected ? 'Clear All' : 'Select All'}
+                      </button>
                     </div>
 
                     <div className="max-h-72 overflow-y-auto rounded-xl ring-1 ring-slate-200 divide-y divide-slate-100">
@@ -557,6 +564,10 @@ export default function SolvePage() {
     setSelectedChapters(chapters)
   }
 
+  const onClearAll = () => {
+    setSelectedChapters([])
+  }
+
   const durationBySubject = {
     'Maths': 90,
     'Physics': 60,
@@ -697,6 +708,7 @@ export default function SolvePage() {
         onToggleChapter={onToggleChapter}
         onBegin={onBegin}
         onSelectAll={onSelectAll}
+        onClearAll={onClearAll}
       />
 
       {/* Mock Flow Modal */}
