@@ -1,6 +1,6 @@
 import React, { useState } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
-import { Home, Trophy, Bookmark, GraduationCap, ChevronRight, ChevronLeft, ChevronDown, Grid3X3, Menu, X, Check, CalendarDays } from 'lucide-react'
+import { Home, Trophy, Bookmark, GraduationCap, ChevronRight, ChevronLeft, ChevronDown, Grid3X3, Menu, X, Check, CalendarDays, Lock } from 'lucide-react'
 import { useNavigate } from 'react-router-dom'
 
 function Sidebar() {
@@ -9,6 +9,8 @@ function Sidebar() {
     { label: 'Leaderboard', icon: Trophy },
     { label: 'Newton School of Technology', icon: GraduationCap },
     { label: 'Saved Questions', icon: Bookmark },
+    { label: 'College Predictor', icon: GraduationCap, locked: true },
+    { label: 'College Counselling', icon: GraduationCap, locked: true },
   ]
 
   return (
@@ -30,9 +32,23 @@ function Sidebar() {
         <ul className="space-y-1.5">
           {menu.map((m, i) => (
             <li key={i}>
-              <a href="#" className="group flex items-center gap-3 rounded-xl px-4 py-2.5 text-sm font-medium text-slate-700 hover:text-slate-900 hover:bg-slate-50 ring-1 ring-transparent hover:ring-slate-200 transition">
-                <m.icon className="h-5 w-5 text-slate-400 group-hover:text-[#1A73E8]" />
-                <span>{m.label}</span>
+              <a
+                href="#"
+                aria-disabled={m.locked ? true : undefined}
+                onClick={(e) => {
+                  if (m.locked) e.preventDefault()
+                }}
+                className={`group flex items-center justify-between gap-3 rounded-xl px-4 py-2.5 text-sm font-medium transition ring-1 ${m.locked ? 'text-slate-400 cursor-not-allowed bg-white ring-slate-200' : 'text-slate-700 hover:text-slate-900 hover:bg-slate-50 ring-transparent hover:ring-slate-200'}`}
+              >
+                <span className="flex items-center gap-3">
+                  <m.icon className={`h-5 w-5 ${m.locked ? 'text-slate-300' : 'text-slate-400 group-hover:text-[#1A73E8]'}`} />
+                  <span>{m.label}</span>
+                </span>
+                {m.locked && (
+                  <span className="inline-flex items-center gap-1 rounded-md bg-slate-100 text-slate-500 px-2 py-1 text-[11px] font-semibold ring-1 ring-slate-200">
+                    <Lock className="h-3.5 w-3.5" /> Locked
+                  </span>
+                )}
               </a>
             </li>
           ))}
@@ -48,6 +64,8 @@ function MobileSidebar({ open, onClose }) {
     { label: 'Leaderboard', icon: Trophy },
     { label: 'Newton School of Technology', icon: GraduationCap },
     { label: 'Saved Questions', icon: Bookmark },
+    { label: 'College Predictor', icon: GraduationCap, locked: true },
+    { label: 'College Counselling', icon: GraduationCap, locked: true },
   ]
 
   return (
@@ -86,9 +104,27 @@ function MobileSidebar({ open, onClose }) {
               <ul className="space-y-1.5">
                 {menu.map((m, i) => (
                   <li key={i}>
-                    <a href="#" onClick={onClose} className="group flex items-center gap-3 rounded-xl px-4 py-2.5 text-sm font-medium text-slate-700 hover:text-slate-900 hover:bg-slate-50 ring-1 ring-transparent hover:ring-slate-200 transition">
-                      <m.icon className="h-5 w-5 text-slate-400 group-hover:text-[#1A73E8]" />
-                      <span>{m.label}</span>
+                    <a
+                      href="#"
+                      onClick={(e) => {
+                        if (m.locked) {
+                          e.preventDefault();
+                          return; // stay in place for locked
+                        }
+                        onClose();
+                      }}
+                      aria-disabled={m.locked ? true : undefined}
+                      className={`group flex items-center justify-between gap-3 rounded-xl px-4 py-2.5 text-sm font-medium transition ring-1 ${m.locked ? 'text-slate-400 cursor-not-allowed bg-white ring-slate-200' : 'text-slate-700 hover:text-slate-900 hover:bg-slate-50 ring-transparent hover:ring-slate-200'}`}
+                    >
+                      <span className="flex items-center gap-3">
+                        <m.icon className={`h-5 w-5 ${m.locked ? 'text-slate-300' : 'text-slate-400 group-hover:text-[#1A73E8]'}`} />
+                        <span>{m.label}</span>
+                      </span>
+                      {m.locked && (
+                        <span className="inline-flex items-center gap-1 rounded-md bg-slate-100 text-slate-500 px-2 py-1 text-[11px] font-semibold ring-1 ring-slate-200">
+                          <Lock className="h-3.5 w-3.5" /> Locked
+                        </span>
+                      )}
                     </a>
                   </li>
                 ))}
