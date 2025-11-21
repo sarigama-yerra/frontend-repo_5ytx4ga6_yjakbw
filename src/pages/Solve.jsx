@@ -316,13 +316,24 @@ function FlowModal({ open, onClose, step, onBack, onNext, onSelectSubject, onSel
   )
 }
 
-function MockModal({ open, onClose, selectedExam, selectedDate, onSelectDate, onBeginMock }) {
+function MockFlowModal({ open, onClose, step, selectedMockExam, setSelectedMockExam, selectedMockSubject, setSelectedMockSubject, selectedMockDate, setSelectedMockDate, onBack, onStart }) {
+  const exams = ['JEE Mains', 'JEE Advanced', 'MH CET', 'BITSAT', 'KCET', 'WBJEE']
+  const subjects = ['Maths', 'Physics', 'Chemistry']
   const dates = [
     '2025 2 April Shift 1',
     '2025 2 April Shift 2',
     '2025 3 April Shift 1',
     '2025 3 April Shift 2',
   ]
+
+  const canContinue = () => {
+    if (step === 'exam') return !!selectedMockExam
+    if (step === 'subject') return !!selectedMockSubject
+    if (step === 'date') return !!selectedMockDate
+    return false
+  }
+
+  const headerTitle = step === 'exam' ? 'Select Exam' : step === 'subject' ? 'Select Subject' : 'Select Exam Date'
 
   return (
     <AnimatePresence>
@@ -333,27 +344,68 @@ function MockModal({ open, onClose, selectedExam, selectedDate, onSelectDate, on
             <motion.div className="w-full max-w-lg overflow-hidden rounded-2xl bg-white ring-1 ring-slate-200 shadow-[24px_24px_64px_rgba(0,0,0,0.12),-16px_-16px_48px_rgba(255,255,255,0.9)]" initial={{ y: 20, scale: 0.98 }} animate={{ y: 0, scale: 1 }} exit={{ y: 20, opacity: 0 }} transition={{ type: 'spring', stiffness: 260, damping: 24 }}>
               <div className="flex items-center justify-between px-5 py-4 border-b border-slate-200/80 bg-gradient-to-b from-white to-slate-50/60">
                 <div>
-                  <div className="text-xs uppercase tracking-wide text-slate-500">{selectedExam}</div>
-                  <div className="font-semibold text-slate-900">Select Exam Date</div>
+                  <div className="text-xs uppercase tracking-wide text-slate-500">Mock Test</div>
+                  <div className="font-semibold text-slate-900">{headerTitle}</div>
                 </div>
-                <button onClick={onClose} className="h-9 w-9 grid place-items-center rounded-lg bg-white ring-1 ring-slate-200 hover:bg-slate-50"><X className="h-5 w-5"/></button>
+                <div className="flex items-center gap-2">
+                  {step !== 'exam' && (
+                    <button onClick={onBack} className="h-9 px-3 rounded-lg bg-white ring-1 ring-slate-200 hover:bg-slate-50 flex items-center gap-1 text-sm"><ChevronLeft className="h-4 w-4"/>Back</button>
+                  )}
+                  <button onClick={onClose} className="h-9 w-9 grid place-items-center rounded-lg bg-white ring-1 ring-slate-200 hover:bg-slate-50"><X className="h-5 w-5"/></button>
+                </div>
               </div>
 
               <div className="px-5 py-4 space-y-3">
-                {dates.map((d) => (
-                  <button key={d} onClick={() => onSelectDate(d)} className={`w-full text-left rounded-xl p-4 ring-1 transition shadow-sm hover:shadow-md flex items-center gap-3 ${selectedDate === d ? 'ring-[#1A73E8] bg-[#1A73E8]/5' : 'ring-slate-200 bg-white'}`}>
-                    <CalendarDays className="h-5 w-5 text-slate-500" />
-                    <div>
-                      <div className="font-medium text-slate-900">{d}</div>
-                      <div className="text-xs text-slate-500">Full-length mock paper</div>
-                    </div>
-                  </button>
-                ))}
+                {step === 'exam' && (
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                    {exams.map((e) => (
+                      <button key={e} onClick={() => setSelectedMockExam(e)} className={`text-left rounded-xl p-4 ring-1 transition shadow-sm hover:shadow-md ${selectedMockExam === e ? 'ring-[#1A73E8] bg-[#1A73E8]/5' : 'ring-slate-200 bg-white'}`}>
+                        <div className="font-medium text-slate-900">{e}</div>
+                        <div className="text-xs text-slate-500 mt-0.5">Full-length mock paper</div>
+                      </button>
+                    ))}
+                  </div>
+                )}
+
+                {step === 'subject' && (
+                  <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+                    {subjects.map((s) => (
+                      <button key={s} onClick={() => setSelectedMockSubject(s)} className={`text-left rounded-xl p-4 ring-1 transition shadow-sm hover:shadow-md ${selectedMockSubject === s ? 'ring-[#1A73E8] bg-[#1A73E8]/5' : 'ring-slate-200 bg-white'}`}>
+                        <div className="font-medium text-slate-900">{s}</div>
+                        <div className="text-xs text-slate-500 mt-0.5">Timed as per subject</div>
+                      </button>
+                    ))}
+                  </div>
+                )}
+
+                {step === 'date' && (
+                  <div className="grid grid-cols-1 gap-3">
+                    {dates.map((d) => (
+                      <button key={d} onClick={() => setSelectedMockDate(d)} className={`w-full text-left rounded-xl p-4 ring-1 transition shadow-sm hover:shadow-md flex items-center gap-3 ${selectedMockDate === d ? 'ring-[#1A73E8] bg-[#1A73E8]/5' : 'ring-slate-200 bg-white'}`}>
+                        <CalendarDays className="h-5 w-5 text-slate-500" />
+                        <div>
+                          <div className="font-medium text-slate-900">{d}</div>
+                          <div className="text-xs text-slate-500">Choose the exact shift</div>
+                        </div>
+                      </button>
+                    ))}
+                  </div>
+                )}
               </div>
 
               <div className="px-5 py-4 bg-slate-50/60 border-t border-slate-200/80 flex items-center justify-between">
-                <div className="text-xs text-slate-500">No categories, full exam with timer</div>
-                <button disabled={!selectedDate} onClick={onBeginMock} className={`h-9 px-4 rounded-lg text-sm font-semibold transition ${selectedDate ? 'bg-[#1A73E8] text-white hover:bg-[#1667d3]' : 'bg-slate-200 text-slate-500 cursor-not-allowed'}`}>Start Mock Test</button>
+                <div className="text-xs text-slate-500">
+                  {step === 'exam' && 'Step 1 of 3'}
+                  {step === 'subject' && 'Step 2 of 3'}
+                  {step === 'date' && 'Step 3 of 3'}
+                </div>
+                <div className="flex items-center gap-2">
+                  {step !== 'date' ? (
+                    <button disabled={!canContinue()} onClick={() => onStart('next')} className={`h-9 px-4 rounded-lg text-sm font-medium transition ${canContinue() ? 'bg-[#1A73E8] text-white hover:bg-[#1667d3]' : 'bg-slate-200 text-slate-500 cursor-not-allowed'}`}>Continue</button>
+                  ) : (
+                    <button disabled={!canContinue()} onClick={() => onStart('begin')} className={`h-9 px-4 rounded-lg text-sm font-semibold transition ${canContinue() ? 'bg-[#1A73E8] text-white hover:bg-[#1667d3]' : 'bg-slate-200 text-slate-500 cursor-not-allowed'}`}>Start Mock</button>
+                  )}
+                </div>
               </div>
             </motion.div>
           </motion.div>
@@ -367,7 +419,7 @@ export default function SolvePage() {
   const [sidebarOpen, setSidebarOpen] = useState(false)
   const navigate = useNavigate()
 
-  // Flow state
+  // Practice flow state
   const [flowOpen, setFlowOpen] = useState(false)
   const [step, setStep] = useState('subject') // 'subject' | 'year' | 'chapters'
   const [selectedExam, setSelectedExam] = useState('JEE Mains')
@@ -375,8 +427,11 @@ export default function SolvePage() {
   const [selectedYearRange, setSelectedYearRange] = useState('')
   const [selectedChapters, setSelectedChapters] = useState([])
 
-  // Mock test state
+  // Mock flow state (independent)
   const [mockOpen, setMockOpen] = useState(false)
+  const [mockStep, setMockStep] = useState('exam') // 'exam' | 'subject' | 'date'
+  const [mockExam, setMockExam] = useState('')
+  const [mockSubject, setMockSubject] = useState('')
   const [mockDate, setMockDate] = useState('')
 
   const subjectChapters = {
@@ -454,29 +509,42 @@ export default function SolvePage() {
   }
 
   const durationBySubject = {
-    'Maths PYQs': 90,
-    'Physics PYQs': 60,
-    'Chemistry PYQs': 30,
+    'Maths': 90,
+    'Physics': 60,
+    'Chemistry': 30,
   }
 
   const openMock = () => {
     setMockOpen(true)
+    setMockStep('exam')
+    setMockExam('')
+    setMockSubject('')
     setMockDate('')
   }
 
-  const beginMock = () => {
-    const subjectLabel = selectedSubject ? selectedSubject.replace(' PYQs', '') : 'PCM'
-    const durationMinutes = durationBySubject[selectedSubject] || 180
-    setMockOpen(false)
-    navigate('/practice', {
-      state: {
-        mode: 'Mock',
-        examLabel: `${selectedExam} ${mockDate}`,
-        subjectLabel,
-        yearLabel: mockDate,
-        durationMinutes,
-      }
-    })
+  const onMockBack = () => {
+    if (mockStep === 'subject') setMockStep('exam')
+    else if (mockStep === 'date') setMockStep('subject')
+  }
+
+  const onMockContinueOrStart = (action) => {
+    if (action === 'next') {
+      if (mockStep === 'exam') setMockStep('subject')
+      else if (mockStep === 'subject') setMockStep('date')
+    } else if (action === 'begin') {
+      // Start mock
+      const durationMinutes = durationBySubject[mockSubject] || 180
+      setMockOpen(false)
+      navigate('/practice', {
+        state: {
+          mode: 'Mock',
+          examLabel: `${mockExam} ${mockDate}`,
+          subjectLabel: mockSubject,
+          yearLabel: mockDate,
+          durationMinutes,
+        }
+      })
+    }
   }
 
   return (
@@ -542,23 +610,21 @@ export default function SolvePage() {
                 <ExamsGrid onSelectExam={(e) => openFlowForExam(e)} />
               </section>
 
-              {/* Mock Test Section */}
+              {/* Mock Test Section (independent flow) */}
               <section className="mt-8 sm:mt-10 mb-20">
                 <div className="mb-3 flex items-center justify-between">
                   <h2 className="text-lg font-semibold text-slate-900">Give Mock Test</h2>
                 </div>
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                  {[ '2025 2 April', '2025 3 April' ].map((d) => (
-                    <button key={d} onClick={openMock} className="text-left group rounded-2xl bg-white p-5 ring-1 ring-slate-200 shadow-[12px_12px_36px_rgba(0,0,0,0.06),-10px_-10px_36px_rgba(255,255,255,0.9)] hover:shadow-[16px_16px_48px_rgba(0,0,0,0.08),-12px_-12px_44px_rgba(255,255,255,1)] transition">
-                      <div className="flex items-center justify-between">
-                        <div>
-                          <div className="font-semibold text-slate-900">{selectedExam} Mock</div>
-                          <div className="text-sm text-slate-500">Pick a date and start full test</div>
-                        </div>
-                        <div className="h-10 w-10 rounded-xl bg-slate-50 grid place-items-center ring-1 ring-slate-200"> <CalendarDays className="h-5 w-5 text-slate-500"/> </div>
-                      </div>
+                <div className="rounded-2xl bg-white p-5 ring-1 ring-slate-200 shadow-[12px_12px_36px_rgba(0,0,0,0.06),-10px_-10px_36px_rgba(255,255,255,0.9)]">
+                  <div className="flex items-center justify-between gap-3">
+                    <div>
+                      <div className="font-semibold text-slate-900">Attempt full-length mock</div>
+                      <div className="text-sm text-slate-500">Choose exam → subject → exam date</div>
+                    </div>
+                    <button onClick={openMock} className="inline-flex items-center gap-2 h-10 px-4 rounded-lg bg-[#1A73E8] text-white hover:bg-[#1667d3]">
+                      Start <ChevronRight className="h-4 w-4"/>
                     </button>
-                  ))}
+                  </div>
                 </div>
               </section>
             </div>
@@ -566,7 +632,7 @@ export default function SolvePage() {
         </main>
       </div>
 
-      {/* Flow Modal */}
+      {/* Practice Flow Modal */}
       <FlowModal
         open={flowOpen}
         onClose={() => setFlowOpen(false)}
@@ -585,14 +651,19 @@ export default function SolvePage() {
         onSelectAll={onSelectAll}
       />
 
-      {/* Mock Test Modal */}
-      <MockModal
+      {/* Mock Flow Modal */}
+      <MockFlowModal
         open={mockOpen}
         onClose={() => setMockOpen(false)}
-        selectedExam={selectedExam}
-        selectedDate={mockDate}
-        onSelectDate={(d) => setMockDate(d)}
-        onBeginMock={beginMock}
+        step={mockStep}
+        selectedMockExam={mockExam}
+        setSelectedMockExam={setMockExam}
+        selectedMockSubject={mockSubject}
+        setSelectedMockSubject={setMockSubject}
+        selectedMockDate={mockDate}
+        setSelectedMockDate={setMockDate}
+        onBack={onMockBack}
+        onStart={onMockContinueOrStart}
       />
     </div>
   )
